@@ -44,7 +44,7 @@ body::after {
 .app {
   display: grid;
   grid-template-rows: auto 1fr;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 380px 1fr;
   height: 100vh;
   padding-top: 76px;
   gap: 0;
@@ -270,10 +270,11 @@ input[type=range] {
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  min-height: 0;
+  min-height: 120px;
 }
 .result-swatch-inner {
-  width: 100%; height: 100%;
+  position: absolute;
+  inset: 0;
   transition: background 0.04s;
 }
 .swatch-fullscreen-btn {
@@ -435,28 +436,36 @@ input[type=range] {
 
 /* ─── Fullscreen Overlay ─────────────────────── */
 .fullscreen-overlay {
-  display: none;
-  position: fixed; inset: 0; z-index: 1000;
+  position: fixed; inset: 0; z-index: 10000;
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
 }
-.fullscreen-overlay.show { display: flex; }
+.fullscreen-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
 .fullscreen-exit {
   position: absolute;
   top: 20px; right: 20px;
-  width: 40px; height: 40px;
+  width: 44px; height: 44px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.25);
   color: #fff;
-  font-size: 1rem;
+  font-size: 1.1rem;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   backdrop-filter: blur(8px);
   z-index: 2;
+  transition: background 0.2s, transform 0.15s;
 }
+.fullscreen-exit:hover { background: rgba(0,0,0,0.7); transform: scale(1.1); }
 .fullscreen-color-name {
   font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(1.5rem, 4vw, 3rem);
@@ -616,10 +625,12 @@ input[type=range] {
   <section class="result-panel">
     <div class="panel-label">Result</div>
 
-    <div class="result-swatch">
+    <div class="result-swatch" onclick="openFullscreen()">
       <div class="result-swatch-inner" id="resultSwatch"></div>
-      <button class="swatch-fullscreen-btn" onclick="openFullscreen()" title="Fullscreen">⛶</button>
-      <div class="swatch-overlay-label">Combined Color</div>
+      <button class="swatch-fullscreen-btn" onclick="openFullscreen(); event.stopPropagation();" title="View fullscreen">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+      </button>
+      <div class="swatch-overlay-label">Click to fullscreen</div>
     </div>
 
     <div class="result-name-row">
@@ -671,9 +682,12 @@ input[type=range] {
 
 <!-- ── Fullscreen Overlay ── -->
 <div class="fullscreen-overlay" id="fsOverlay" onclick="closeFullscreen()">
-  <button class="fullscreen-exit" onclick="closeFullscreen(); event.stopPropagation();">✕</button>
+  <button class="fullscreen-exit" onclick="closeFullscreen(); event.stopPropagation();" title="Exit fullscreen">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>
+  </button>
   <div class="fullscreen-color-name" id="fsName"></div>
   <div class="fullscreen-code" id="fsCode"></div>
+  <div style="position:absolute;bottom:24px;font-family:'JetBrains Mono',monospace;font-size:0.55rem;letter-spacing:0.15em;color:rgba(255,255,255,0.3);mix-blend-mode:difference;pointer-events:none;">PRESS ESC OR CLICK TO EXIT</div>
 </div>
 
 <script>
